@@ -10,6 +10,7 @@
 # A Python wrapper module around the C library libgauss.so
 
 import ctypes
+import numpy as np
 
 gauss_library_path = './libgauss.so'
 
@@ -73,7 +74,27 @@ def lu(A, use_c=False):
     else:
         return lu_python(A)
 
+def plu(A, use_c=False):
+    if use_c:
+        return plu_c(A)
+    else:
+        return plu_python(A)
 
+def plu_python(A):
+    n = len(A)
+    L=np.eye(n)
+    U=np.eye(n)
+    P=np.eye(n)
+
+    return P,L,U
+
+def plu_c(A):
+    n = len(A)
+    L=np.eye(n)
+    U=np.eye(n)
+    P=np.eye(n)
+
+    return P,L,U
 
 if __name__ == "__main__":
 
