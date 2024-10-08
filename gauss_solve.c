@@ -8,6 +8,8 @@
 *
 *----------------------------------------------------------------*/
 #include "gauss_solve.h"
+#include <math.h>
+
 
 void gauss_solve_in_place(const int n, double A[n][n], double b[n])
 {
@@ -65,4 +67,60 @@ void lu_in_place_reconstruct(int n, double A[n][n])
       }
     }
   }
+}
+
+
+// Function to perform PA=LU decomposition
+void plu(int n, double A[n][n], int P[n]) {
+    int i, j, k, pivot_row;
+    double pivot_elt;
+
+    // Initialize permutation array
+    for (i = 0; i < n; i++) {
+        P[i] = i;
+    }
+
+    // Loop over each column k
+    for (k = 0; k < n; k++) {
+        pivot_row = k;
+        pivot_elt = fabs(A[k][k]);  // Find the pivot element
+
+        // Find the row with the largest pivot element in column k
+        for (i = k + 1; i < n; i++) {
+            if (fabs(A[i][k]) > pivot_elt) {
+                pivot_elt = fabs(A[i][k]);
+                pivot_row = i;
+            }
+        }
+
+        // Swap the rows if necessary
+        if (pivot_row != k) {
+            // Swap rows in permutation array
+            int temp = P[k];
+            P[k] = P[pivot_row];
+            P[pivot_row] = temp;
+
+            // Swap rows in matrix A
+            for (j = 0; j < n; j++) {
+                double temp_row = A[k][j];
+                A[k][j] = A[pivot_row][j];
+                A[pivot_row][j] = temp_row;
+            }
+        }
+
+        // Update the matrix A for the U matrix
+        for (i = k; i < n; i++) {
+            for (j = 0; j < k; j++) {
+                A[k][i] -= A[k][j] * A[j][i];
+            }
+        }
+
+        // Update the matrix A for the L matrix
+        for (i = k + 1; i < n; i++) {
+            for (j = 0; j < k; j++) {
+                A[i][k] -= A[i][j] * A[j][k];
+            }
+            A[i][k] /= A[k][k];
+        }
+    }
 }
