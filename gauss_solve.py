@@ -82,10 +82,30 @@ def plu(A, use_c=False):
 
 def plu_python(A):
     n = len(A)
-    L=np.eye(n)
-    U=np.eye(n)
-    P=np.eye(n)
+    L=np.zeros((n,n))
+    #U=np.array(A)
+    P_flat= np.linspace(0,n-1,n)
 
+    for k in range(n):
+        pivot_row = k
+        pivot_elt = abs(A[k][k])
+        for i in range(k+1, n):
+            if abs(A[i][k]) > pivot_elt:
+                pivot_elt = abs(A[i][k])
+                pivot_row = i
+        if pivot_row != k:
+            P_flat[k], P_flat[pivot_row] = P_flat[pivot_row], P_flat[k]
+            A[k], A[pivot_row] = A[pivot_row], A[k]
+        for i in range(k,n):
+            for j in range(k):
+                A[k][i] -= A[k][j] * A[j][i]
+        for i in range(k+1, n):
+            for j in range(k):
+                A[i][k] -= A[i][j] * A[j][k]
+            A[i][k] /= A[k][k]
+    
+    P=P_flat.astype(int).tolist()
+    L, U = unpack(A)
     return P,L,U
 
 def plu_c(A):
