@@ -109,11 +109,31 @@ def plu_python(A):
     return P,L,U
 
 def plu_c(A):
-    n = len(A)
-    L=np.eye(n)
-    U=np.eye(n)
-    P=np.eye(n)
+    # Load the shared library
+    lib = ctypes.CDLL(gauss_library_path)
 
+    # Create a 2D array in Python and flatten it
+    n = len(A)
+    flat_array_2d = [item for row in A for item in row]
+
+    # Convert to a ctypes array
+    c_A = (ctypes.c_double * len(flat_array_2d))(*flat_array_2d)
+    c_P = (ctypes.c_int * n)()
+    # Define the function signature
+    lib.plu.argtypes = (ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
+
+    # Modify the array in C (e.g., add 10 to each element)
+    lib.plu(n, c_A, c_P)
+
+    # Convert back to a 2D Python list of lists
+    updated_A = [
+        [c_A[i * n + j] for j in range(n)]
+        for i in range(n)
+    ]
+
+    # Extract L and U parts from A, fill with 0's and 1's
+    L,U = unpack(updated_A)
+    P = list(c_P)
     return P,L,U
 
 if __name__ == "__main__":
